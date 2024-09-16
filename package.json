@@ -1,0 +1,21 @@
+{
+  "name": "express-di-template",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "awilix": "^11.0.0",
+    "awilix-express": "^9.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "http-status": "^1.7.4",
+    "jsonwebtoken": "^9.0.2",
+    "rotating-file-stream": "^3.2.4"
+  }
+}

@@ -6,7 +6,10 @@ const models = require("../src/models");
 const container = createContainer();
 const DB = require("../shared/Database");
 const Server = require("./server");
+const config = require("../config");
+
 container.register({
+    config: asValue(config),
     Fault: asValue(Fault),
     models: asValue(models),
     DB: asValue(DB),
@@ -15,7 +18,7 @@ container.register({
 
 container.loadModules(
     [
-        "src/application/*.js",
+        "src/application/**/*.js",
         "src/controllers/*.js",
         "src/repository/*.js",
         "src/models/*.js",

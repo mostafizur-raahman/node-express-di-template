@@ -6,6 +6,7 @@ const morgan = require("morgan");
 const rfs = require("rotating-file-stream");
 const path = require("path");
 const _http = require("http");
+const config = require("../config");
 
 class Server {
     constructor({ config, DB, containerMiddleware }) {
@@ -20,12 +21,13 @@ class Server {
 
         return new Promise((resolve) => {
             const server = _http.createServer(this.express);
-            const http = server.listen(this.config.port, () => {
+            const port = this.config.port || 3000;
+
+            const http = server.listen(port, () => {
                 const { port } = http.address();
                 console.log(
                     ` ${new Date()} \n Template running on port ${port}`
                 );
-
                 resolve();
             });
         });

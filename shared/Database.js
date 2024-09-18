@@ -4,7 +4,7 @@ const config = require("../config");
 class Database {
     static async connect() {
         try {
-            await mongoose.connect(config.MONGO_URI);
+            await mongoose.connect(config.mongo_uri);
 
             console.log("MongoDB connected");
         } catch (err) {

@@ -18,10 +18,10 @@ container.register({
 
 container.loadModules(
     [
-        "src/application/**/*.js",
-        "src/controllers/*.js",
-        "src/repository/*.js",
-        "src/models/*.js",
+        "application/**/*.js",
+        "controllers/*.js",
+        "repositories/*.js",
+        "models/*.js",
         "shared/*.js",
     ],
     {
@@ -37,8 +37,7 @@ container.register({
     containerMiddleware: asValue(scopePerRequest(container)),
 });
 
-// Print the loaded modules
-// console.debug("Loaded Modules:");
-// console.debug(container.registrations);
+console.debug("Loaded Modules:");
+console.debug(container.registrations);
 
 module.exports = container;

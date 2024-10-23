@@ -3,81 +3,7 @@ const { default: mongoose } = require("mongoose");
 class BaseRepository {
     constructor(model) {
         this.model = model;
-
-        this.defaultProjection = {
-            password: 0,
-            __v: 0,
-            isDeleted: 0,
-            editors: 0,
-        };
-
-        // v2, updated
-        this.baseProjection = {
-            negative: {
-                default: {
-                    __v: 0,
-                    isDeleted: 0,
-                    states: 0,
-                    createdBy: 0,
-                },
-                date: {
-                    createdAt: 0,
-                    updatedAt: 0,
-                },
-            },
-        };
-
         this.modelName = model.modelName;
-    }
-
-    /**
-     * Creates an ObjectId from a string.
-     * Uses new mechanism to create ObjectId instead of mongoose.Types.ObjectId
-     *
-     * @param {string} id String to be converted to ObjectId
-     */
-    createObjectId(id) {
-        mongoose.Types.ObjectId.createFromTime(id);
-    }
-
-    async createDocIfNotExist(query, entity, userId) {
-        try {
-            const doc = await this.model.findOne(query);
-
-            if (!doc) {
-                const newDoc = await this.create({
-                    ...entity,
-                    createdBy: userId,
-                });
-
-                return newDoc;
-            }
-
-            return doc;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async checkForUnAllowedItems(query, ids) {
-        console.group("Checking for UnAllowed Items on ", this.modelName);
-        console.debug(query);
-        console.debug(ids);
-
-        const doc = await this.model.findOne(query);
-
-        console.debug(doc ? doc._id : null);
-        console.groupEnd("Checking for UnAllowed Items on ", this.modelName);
-
-        if (
-            doc &&
-            ((Array.isArray(ids) && ids.includes(doc._id.toString())) ||
-                ids === doc._id.toString())
-        ) {
-            return false;
-        }
-
-        return true;
     }
 
     createLookupStage({ localField, foreignField = "_id", as, from }) {
@@ -112,13 +38,6 @@ class BaseRepository {
         ];
     }
 
-    /**
-     * Adds a new entity to the database.
-     *
-     * @param {Object} entity
-     * @throws {Error} If the entity fails to be created.
-     * @returns {Promise<Object>} The newly created entity.
-     */
     async create(entity) {
         try {
             const doc = new this.model(entity);
@@ -130,13 +49,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Adds multiple entities to the database.
-     *
-     * @param {Array<Object>} entities
-     * @throws {Error} If any of the entities fail to be created.
-     * @returns {Promise<Array<Object>>} The newly created entities.
-     */
     async createMany(entities) {
         try {
             const docs = await this.model.insertMany(entities);
@@ -147,14 +59,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Finds a single entity by its ID.
-     *
-     * @param {string} id
-     * @returns {Promise<Object>} The found entity.
-     * @throws {Error} If no entity is found.
-     * @throws {Error} If the entity is already deleted.
-     */
     async findById(id) {
         try {
             const doc = await this.model.findOne({ _id: id, isDeleted: false });
@@ -165,16 +69,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Updates an entity that match the provided query.
-     *
-     * @param {Object} query
-     * @param {Object} entity
-     * @returns {Promise<Array<Object>>} The updated entities.
-     * @throws {Error} If the entities fail to be updated.
-     * @throws {Error} If no entities are found.
-     * @throws {Error} If the query is invalid.
-     */
     async updateOneByQuery(query, entity) {
         try {
             const docs = await this.model.updateOne(query, entity);
@@ -209,12 +103,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Finds all entities.
-     *
-     * @returns {Promise<Array<Object>>} The found entities.
-     * @throws {Error} If no entities are found.
-     */
     async findAll({ fields = "-password" }) {
         try {
             const docs = await this.model
@@ -227,15 +115,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Updates an entity by its ID.
-     *
-     * @param {string} id
-     * @param {Object} entity
-     * @returns {Promise<Object>} The updated entity.
-     * @throws {Error} If the entity fails to be updated.
-     * @throws {Error} If the entity is not found.
-     */
     async updateById(id, entity) {
         try {
             const doc = await this.model.findOneAndUpdate(
@@ -250,14 +129,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Deletes an entity by its ID.
-     *
-     * @param {string} id
-     * @returns {Promise<Object>} The deleted entity.
-     * @throws {Error} If the entity fails to be deleted.
-     * @throws {Error} If the entity is already deleted.
-     */
     async deleteById(id) {
         try {
             const doc = await this.model.findOneAndUpdate(
@@ -272,13 +143,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Deletes all entities.
-     *
-     * @returns {Promise<Array<Object>>} The deleted entities.
-     * @throws {Error} If the entities fail to be deleted.
-     * @throws {Error} If no entities are found.
-     */
     async deleteAll() {
         try {
             const docs = await this.model.updateMany(
@@ -293,15 +157,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Finds all entities that match the provided query.
-     *
-     * @param {Object} query
-     * @param {Object} sortOptions
-     * @returns {Promise<Array<Object>>} The found entities.
-     * @throws {Error} If no entities are found.
-     * @throws {Error} If the query is invalid.
-     */
     async findByQuery(query, sortOptions = {}, _selection = "-password") {
         try {
             const docs = await this.model
@@ -315,14 +170,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Finds a single entity that matches the provided query.
-     *
-     * @param {Object} query
-     * @returns {Promise<Object>} The found entity.
-     * @throws {Error} If no entity is found.
-     * @throws {Error} If the query is invalid.
-     */
     async findOneByQuery(query) {
         console.group(this.model.modelName, "findOneByQuery");
         console.debug(query);
@@ -337,16 +184,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Updates all entities that match the provided query.
-     *
-     * @param {Object} query
-     * @param {Object} entity
-     * @returns {Promise<Array<Object>>} The updated entities.
-     * @throws {Error} If the entities fail to be updated.
-     * @throws {Error} If no entities are found.
-     * @throws {Error} If the query is invalid.
-     */
     async updateManyByQuery(query, entity) {
         try {
             const docs = await this.model.updateMany(query, entity);
@@ -357,15 +194,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Deletes all entities that match the provided query.
-     *
-     * @param {Object} query
-     * @returns {Promise<Array<Object>>} The deleted entities.
-     * @throws {Error} If the entities fail to be deleted.
-     * @throws {Error} If no entities are found.
-     * @throws {Error} If the query is invalid.
-     */
     async deleteManyByQuery(query, deletedBy) {
         try {
             const docs = await this.model.updateMany(query, {
@@ -391,13 +219,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Counts all entities.
-     *
-     * @returns {Promise<number>} The number of entities.
-     * @throws {Error} If the entities fail to be counted.
-     * @throws {Error} If no entities are found.
-     */
     async countAll(query = { isDeleted: false }) {
         try {
             const count = await this.model.countDocuments(query);
@@ -408,15 +229,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Counts all entities that match the provided query.
-     *
-     * @param {Object} query
-     * @returns {Promise<number>} The number of entities.
-     * @throws {Error} If the entities fail to be counted.
-     * @throws {Error} If no entities are found.
-     * @throws {Error} If the query is invalid.
-     */
     async countByQuery(query) {
         try {
             const count = await this.model.countDocuments(query);
@@ -427,13 +239,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Checks if an entity exists by its ID.
-     *
-     * @param {string} id
-     * @returns {Promise<boolean>} Whether or not the entity exists.
-     * @throws {Error} If the entity fails to be checked.
-     */
     async existsById(id) {
         try {
             const doc = await this.model.findOne({ _id: id });
@@ -444,14 +249,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Checks if an entity exists that matches the provided query.
-     *
-     * @param {Object} query
-     * @returns {Promise<boolean>} Whether or not the entity exists.
-     * @throws {Error} If the entity fails to be checked.
-     * @throws {Error} If the query is invalid.
-     */
     async existsByQuery(query) {
         try {
             const doc = await this.model.findOne(query);
@@ -462,12 +259,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Aggregate entities.
-     *
-     * @param {Array<Object>} queries Aggregation queries.
-     * @returns {Promise<Array<Object>>} The aggregated entities.
-     */
     async aggregate(queries) {
         try {
             console.time("Time spent in DB Query");
@@ -482,13 +273,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Gets distinct values of a field.
-     *
-     * @param {String} field The field to get distinct values of
-     * @param {Object} query The query to match
-     * @returns
-     */
     async getDistinct(
         field,
         query = { [field]: { $exists: true, $ne: null } }
@@ -502,11 +286,6 @@ class BaseRepository {
         }
     }
 
-    /**
-     * Finds the last entity.
-     *
-     * @returns {Promise<Object>} The found entity.
-     */
     async findLast() {
         try {
             const doc = await this.model.findOne().sort({ createdAt: -1 });
